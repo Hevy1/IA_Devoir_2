@@ -66,6 +66,9 @@ private:
   //boolean indicating if the vehicle is currently being followed
   bool m_isFollowed;
 
+  //boolean indicating if vehicle is connected to leader
+  bool m_followLeader;
+
 
 public:
 
@@ -103,6 +106,9 @@ public:
 
   void SetIsFollowed(bool b) { m_isFollowed = b; }
   bool GetIsFollowed() { return m_isFollowed; }
+
+  void SetFollowLeader(bool b) { m_followLeader = b; }
+  bool GetFollowLeader() { return m_followLeader; }
  
 };
 

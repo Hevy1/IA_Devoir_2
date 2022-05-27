@@ -64,11 +64,11 @@ GameWorld::GameWorld(int cx, int cy):
                                     Vector2D(0,0),
                                     Prm.VehicleMass,          //mass
                                     Prm.MaxSteeringForce,     //max force
-                                    Prm.MaxSpeed,             //max velocity
+                                    Prm.MaxSpeed/1.75,             //max velocity
                                     Prm.MaxTurnRatePerSecond, //max turn rate
-                                    Prm.VehicleScale);        //scale
+                                    Prm.VehicleScale,         //scale
+                                    Vector2D(0.05f,0.05f));     //offset
 
-    
 
     m_Vehicles.push_back(pFollower);
 
@@ -138,10 +138,13 @@ void GameWorld::Update(double time_elapsed)
   
 
   //update the vehicles
-  for (unsigned int a=0; a<m_Vehicles.size(); ++a)
+  for (unsigned int a=0; a<m_Vehicles.size()-1; ++a)
   {
     m_Vehicles[a]->Update(time_elapsed);
+    ((Follower*)m_Vehicles[a])->ChangeBehavior();
   }
+
+  m_Vehicles[m_Vehicles.size()-1]->Update(time_elapsed);
 }
   
 
