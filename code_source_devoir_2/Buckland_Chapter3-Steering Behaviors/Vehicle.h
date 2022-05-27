@@ -63,6 +63,9 @@ private:
   Vehicle(const Vehicle&);
   Vehicle& operator=(const Vehicle&);
 
+  //boolean indicating if the vehicle is currently being followed
+  bool m_isFollowed;
+
 
 public:
 
@@ -97,6 +100,9 @@ public:
   void        ToggleSmoothing(){m_bSmoothingOn = !m_bSmoothingOn;}
   
   double       TimeElapsed()const{return m_dTimeElapsed;}
+
+  void SetIsFollowed(bool b) { m_isFollowed = b; }
+  bool GetIsFollowed() { return m_isFollowed; }
  
 };
 

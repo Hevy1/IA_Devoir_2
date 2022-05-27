@@ -1,5 +1,7 @@
 #include "Agents.h"
+#include "SteeringBehaviors.h"
 
+// Functions related to Follower class
 Follower::Follower(GameWorld* world,
 	Vector2D position,
 	double mass,
@@ -15,13 +17,26 @@ Follower::Follower(GameWorld* world,
 		max_speed,             //max velocity
 		max_turn_rate, //max turn rate
 		scale) {
-	this->Steering()->FlockingOn();
+	this->Steering()->WanderOn();
+    this->Steering()->SetOffset()
 }
 
+void Follower::Update(double time_elapsed)
+{
+    this->Vehicle::Update(time_elapsed);
 
-#include "Agents.h"
-#include "SteeringBehaviors.h"
+    if (!isFollowing)
+    {
+        
+        Vehicle* target;
 
+        target->SetIsFollowed(true);
+        target->Steering()->SetTargetAgent2(this);
+        this->Steering()->SetTargetAgent1(this);
+        this->Steering()->OffsetPursuitOn();
+    }
+
+}
 
 // Functions related to Leader class
 Leader::Leader(GameWorld* world,
