@@ -50,7 +50,7 @@ GameWorld::GameWorld(int cx, int cy):
   m_pPath = new Path(5, border, border, cx-border, cy-border, true); 
 
   //setup the agents
-  for (int a=0; a<Prm.NumAgents; ++a)
+  for (int a=0; a<Prm.NumAgents-1; ++a)
   {
 
     //determine a random starting position
@@ -58,8 +58,10 @@ GameWorld::GameWorld(int cx, int cy):
                                  cy/2.0+RandomClamped()*cy/2.0);
 
 
-    Follower* pAgent = new Follower(this,
+    Follower* pFollower = new Follower(this,
                                     SpawnPos,                 //initial position
+                                    RandFloat()*TwoPi,
+                                    Vector2D(0,0),
                                     Prm.VehicleMass,          //mass
                                     Prm.MaxSteeringForce,     //max force
                                     Prm.MaxSpeed,             //max velocity
@@ -68,26 +70,32 @@ GameWorld::GameWorld(int cx, int cy):
 
     
 
-    m_Vehicles.push_back(pAgent);
+    m_Vehicles.push_back(pFollower);
 
     //add it to the cell subdivision
-    m_pCellSpace->AddEntity(pAgent);
+    m_pCellSpace->AddEntity(pFollower);
   }
 
 
 #define SHOAL
 #ifdef SHOAL
-  m_Vehicles[Prm.NumAgents-1]->Steering()->FlockingOff();
-  m_Vehicles[Prm.NumAgents-1]->SetScale(Vector2D(10, 10));
-  m_Vehicles[Prm.NumAgents-1]->Steering()->WanderOn();
-  m_Vehicles[Prm.NumAgents-1]->SetMaxSpeed(70);
+  Vector2D SpawnPos = Vector2D(cx / 2.0 + RandomClamped() * cx / 2.0,
+      cy / 2.0 + RandomClamped() * cy / 2.0);
+
+  Leader* pLeader = new Leader(this,
+      SpawnPos,                 //initial position
+      RandFloat() * TwoPi,
+      Vector2D(0, 0),
+      Prm.VehicleMass,          //mass
+      Prm.MaxSteeringForce,     //max force
+      Prm.MaxSpeed,             //max velocity
+      Prm.MaxTurnRatePerSecond, //max turn rate
+      Prm.VehicleScale);        //scale
+
+  m_Vehicles.push_back(pLeader);
 
 
-   for (int i=0; i<Prm.NumAgents-1; ++i)
-  {
-    m_Vehicles[i]->Steering()->EvadeOn(m_Vehicles[Prm.NumAgents-1]);
-
-  }
+   
 #endif
  
   //create any obstacles or walls

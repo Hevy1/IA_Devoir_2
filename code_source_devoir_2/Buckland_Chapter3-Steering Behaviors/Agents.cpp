@@ -2,25 +2,25 @@
 
 Follower::Follower(GameWorld* world,
 	Vector2D position,
+    double    rotation,
+    Vector2D velocity,
 	double mass,
 	double max_force,
 	double max_speed,
 	double max_turn_rate,
 	double scale) : Vehicle(world,
 		position,                 //initial position
-		RandFloat()* TwoPi,        //start rotation
-		Vector2D(0, 0),            //velocity
+		rotation,        //start rotation
+		velocity,            //velocity
 		mass,          //mass
 		max_force,     //max force
 		max_speed,             //max velocity
 		max_turn_rate, //max turn rate
-		scale) {
+		scale)
+{
 	this->Steering()->FlockingOn();
 }
 
-
-#include "Agents.h"
-#include "SteeringBehaviors.h"
 
 
 // Functions related to Leader class
