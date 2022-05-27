@@ -66,7 +66,7 @@
       <PrecompiledHeaderOutputFile>.\Release\Steering.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\Release\</ObjectFileName>
       <ProgramDataBaseFileName>.\Release\</ProgramDataBaseFileName>
-      <AdditionalIncludeDirectories>D:\Cours\S3\IA\TP2\IA_Devoir_2\code_source_devoir_2\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -108,7 +108,7 @@
       <ObjectFileName>.\Debug\</ObjectFileName>
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <AdditionalIncludeDirectories>D:\Cours\S3\IA\TP2\IA_Devoir_2\code_source_devoir_2\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -139,6 +139,7 @@
     <ClCompile Include="..\Common\misc\iniFileLoaderBase.cpp" />
     <ClCompile Include="..\Common\misc\WindowUtils.cpp" />
     <ClCompile Include="..\Common\Time\PrecisionTimer.cpp" />
+    <ClCompile Include="Agents.cpp" />
     <ClCompile Include="GameWorld.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Obstacle.cpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="..\Common\misc\utils.h" />
     <ClInclude Include="..\Common\misc\WindowUtils.h" />
     <ClInclude Include="..\Common\Time\PrecisionTimer.h" />
+    <ClInclude Include="Agents.h" />
     <ClInclude Include="BaseGameEntity.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="EntityFunctionTemplates.h" />
