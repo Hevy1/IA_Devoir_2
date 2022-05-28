@@ -42,12 +42,31 @@ GameWorld::GameWorld(int cx, int cy):
             m_bViewKeys(false),
             m_bShowCellSpaceInfo(false)
 {
+  m_human = false;
 
   //setup the spatial subdivision class
   m_pCellSpace = new CellSpacePartition<Vehicle*>((double)cx, (double)cy, Prm.NumCellsX, Prm.NumCellsY, Prm.NumAgents);
 
   double border = 30;
   m_pPath = new Path(5, border, border, cx-border, cy-border, true); 
+
+#define SHOAL
+#ifdef SHOAL
+  Vector2D SpawnPos = Vector2D(cx / 2.0 + RandomClamped() * cx / 2.0,
+      cy / 2.0 + RandomClamped() * cy / 2.0);
+
+  Leader* pLeader = new Leader(this,
+      SpawnPos,                 //initial position
+      RandFloat() * TwoPi,
+      Vector2D(0, 0),
+      Prm.VehicleMass,          //mass
+      Prm.MaxSteeringForce,     //max force
+      Prm.MaxSpeed,             //max velocity
+      Prm.MaxTurnRatePerSecond, //max turn rate
+      Prm.VehicleScale);        //scale
+
+  m_Vehicles.push_back(pLeader);
+#endif
 
   //setup the agents
   for (int a=0; a<Prm.NumAgents-1; ++a)
@@ -67,7 +86,8 @@ GameWorld::GameWorld(int cx, int cy):
                                     Prm.MaxSpeed/1.75,             //max velocity
                                     Prm.MaxTurnRatePerSecond, //max turn rate
                                     Prm.VehicleScale,         //scale
-                                    Vector2D(0.05f,0.05f));     //offset
+                                    Vector2D(0.05f,0.05f),    //offset
+                                    pLeader);                 //leader
 
 
     m_Vehicles.push_back(pFollower);
@@ -77,26 +97,7 @@ GameWorld::GameWorld(int cx, int cy):
   }
 
 
-#define SHOAL
-#ifdef SHOAL
-  Vector2D SpawnPos = Vector2D(cx / 2.0 + RandomClamped() * cx / 2.0,
-      cy / 2.0 + RandomClamped() * cy / 2.0);
 
-  Leader* pLeader = new Leader(this,
-      SpawnPos,                 //initial position
-      RandFloat() * TwoPi,
-      Vector2D(0, 0),
-      Prm.VehicleMass,          //mass
-      Prm.MaxSteeringForce,     //max force
-      Prm.MaxSpeed,             //max velocity
-      Prm.MaxTurnRatePerSecond, //max turn rate
-      Prm.VehicleScale);        //scale
-
-  m_Vehicles.push_back(pLeader);
-
-
-   
-#endif
  
   //create any obstacles or walls
   //CreateObstacles();
@@ -138,13 +139,17 @@ void GameWorld::Update(double time_elapsed)
   
 
   //update the vehicles
-  for (unsigned int a=0; a<m_Vehicles.size()-1; ++a)
+  for (unsigned int a=1; a<m_Vehicles.size(); ++a)
   {
     m_Vehicles[a]->Update(time_elapsed);
     ((Follower*)m_Vehicles[a])->ChangeBehavior();
   }
 
-  m_Vehicles[m_Vehicles.size()-1]->Update(time_elapsed);
+  ((Leader*)m_Vehicles[0])->ChangeBehavior(&m_input);
+  m_Vehicles[0]->Update(time_elapsed);
+  m_input.x = 0;
+  m_input.y = 0;
+
 }
   
 
@@ -260,64 +265,103 @@ void GameWorld::SetCrosshair(POINTS p)
 void GameWorld::HandleKeyPresses(WPARAM wParam)
 {
 
-  switch(wParam)
-  {
-  case 'U':
+    switch (wParam)
     {
-      delete m_pPath;
-      double border = 60;
-      m_pPath = new Path(RandInt(3, 7), border, border, cxClient()-border, cyClient()-border, true); 
-      m_bShowPath = true; 
-      for (unsigned int i=0; i<m_Vehicles.size(); ++i)
-      {
-        m_Vehicles[i]->Steering()->SetPath(m_pPath->GetPath());
-      }
+    case 'U':
+    {
+        delete m_pPath;
+        double border = 60;
+        m_pPath = new Path(RandInt(3, 7), border, border, cxClient() - border, cyClient() - border, true);
+        m_bShowPath = true;
+        for (unsigned int i = 0; i < m_Vehicles.size(); ++i)
+        {
+            m_Vehicles[i]->Steering()->SetPath(m_pPath->GetPath());
+        }
     }
     break;
 
     case 'P':
-      
-      TogglePause(); break;
+
+        TogglePause(); break;
 
     case 'O':
 
-      ToggleRenderNeighbors(); break;
+        ToggleRenderNeighbors(); break;
 
     case 'I':
 
-      {
-        for (unsigned int i=0; i<m_Vehicles.size(); ++i)
+    {
+        for (unsigned int i = 0; i < m_Vehicles.size(); ++i)
         {
-          m_Vehicles[i]->ToggleSmoothing();
+            m_Vehicles[i]->ToggleSmoothing();
         }
 
-      }
+    }
 
-      break;
+    break;
 
     case 'Y':
 
-       m_bShowObstacles = !m_bShowObstacles;
+        m_bShowObstacles = !m_bShowObstacles;
 
         if (!m_bShowObstacles)
         {
-          m_Obstacles.clear();
+            m_Obstacles.clear();
 
-          for (unsigned int i=0; i<m_Vehicles.size(); ++i)
-          {
-            m_Vehicles[i]->Steering()->ObstacleAvoidanceOff();
-          }
+            for (unsigned int i = 0; i < m_Vehicles.size(); ++i)
+            {
+                m_Vehicles[i]->Steering()->ObstacleAvoidanceOff();
+            }
         }
         else
         {
-          CreateObstacles();
+            CreateObstacles();
 
-          for (unsigned int i=0; i<m_Vehicles.size(); ++i)
-          {
-            m_Vehicles[i]->Steering()->ObstacleAvoidanceOn();
-          }
+            for (unsigned int i = 0; i < m_Vehicles.size(); ++i)
+            {
+                m_Vehicles[i]->Steering()->ObstacleAvoidanceOn();
+            }
         }
         break;
+
+    case 'H':
+    {
+        m_input.x = 0.f;
+        m_input.y = 0.f;
+        
+        if (m_human)
+            m_human = false;
+        else
+            m_human = true;
+    }
+
+    case VK_LEFT:
+    {
+        m_input.x = -1.f;
+        m_input.y = 0.f;
+        break;
+    }
+
+    case VK_RIGHT:
+    {
+        m_input.x = 1.f;
+        m_input.y = 0.f;
+        break;
+    }
+
+    case VK_UP:
+    {
+        m_input.x = 0.f;
+        m_input.y = -1.f;
+        break;
+    }
+
+    case VK_DOWN:
+    {
+        m_input.x = 0.f;
+        m_input.y = 1.f;
+        break;
+    }
 
   }//end switch
 }

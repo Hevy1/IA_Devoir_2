@@ -26,7 +26,7 @@ class SteeringBehavior;
 class Vehicle : public MovingEntity
 {
 
-private:
+protected:
 
   //a pointer to the world data. So a vehicle can access any obstacle,
   //path, wall or agent data
@@ -69,6 +69,9 @@ private:
   //boolean indicating if vehicle is connected to leader
   bool m_followLeader;
 
+  //vector indicating in which direction the human player goes
+  Vector2D* m_input;
+
 
 public:
 
@@ -109,6 +112,8 @@ public:
 
   void SetFollowLeader(bool b) { m_followLeader = b; }
   bool GetFollowLeader() { return m_followLeader; }
+
+  virtual Vector2D GetForces() = 0;
  
 };
 

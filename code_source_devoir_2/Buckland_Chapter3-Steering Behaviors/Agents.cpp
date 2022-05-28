@@ -3,12 +3,13 @@
 #include "GameWorld.h"
 
 // Constructor of the Followers
-Follower::Follower(GameWorld* world, Vector2D position, double rotation, Vector2D velocity, double mass, double max_force, double max_speed, double max_turn_rate, double scale, Vector2D offset)
+Follower::Follower(GameWorld* world, Vector2D position, double rotation, Vector2D velocity, double mass, double max_force, double max_speed, double max_turn_rate, double scale, Vector2D offset, Vehicle* leader)
     : Vehicle(world, position, rotation, velocity, mass, max_force, max_speed, max_turn_rate, scale) {
 	this->Steering()->WanderOn();
     this->SetIsFollowed(false);
     this->SetFollowLeader(false);
     m_offset = offset;
+    m_leader = leader;
 }
 
 // Each agent will wander until it finds another agent to follow. The agents
@@ -21,10 +22,12 @@ void Follower::ChangeBehavior()
         std::vector<Vehicle*> vehicles = this->World()->Agents();
         Vehicle* target = vehicles[0];
         double min = 1000;
+        int nb = 0;
 
         // Scanning all vehicles to seek a free one
-        for (auto vehicle : vehicles)
+        for (unsigned int i = 0; i < vehicles.size(); i++)
         {
+            Vehicle* vehicle = vehicles[i];
             // If the agent isn't free, continue to the next agent
             if (vehicle->GetIsFollowed())
                 continue;
@@ -45,10 +48,12 @@ void Follower::ChangeBehavior()
                 min = dist;
                 target = vehicle;
             }
+            else if (dist == 0)
+                nb = i;
         }
 
         // Once the nearest free agent is found, we first check if it is near enough
-        if (min < 100)
+        if (!this->World()->GetHuman() && min < 100)
         {
             // Then we set all the necessary variables in order to activate the pursuit
             target->SetIsFollowed(true);
@@ -56,9 +61,22 @@ void Follower::ChangeBehavior()
             this->Steering()->WanderOff();
             this->Steering()->OffsetPursuitOn(target, m_offset);
         }
+        else if (this->World()->GetHuman())
+        {
+            double angle = nb * pi * 2 / (vehicles.size() - 1);
+            Vector2D offsetHuman = Vector2D(cos(angle), sin(angle));
+            this->Steering()->OffsetPursuitOn(m_leader, offsetHuman);
+        }
     }
 
 }
+
+Vector2D Follower::GetForces()
+{
+    return m_pSteering->Calculate();
+}
+
+
 
 // Constructor of the Leader
 Leader::Leader(GameWorld* world, Vector2D position, double rotation, Vector2D velocity, double mass, double max_force, double max_speed, double max_turn_rate, double scale)
@@ -69,4 +87,27 @@ Leader::Leader(GameWorld* world, Vector2D position, double rotation, Vector2D ve
     this->SetMaxSpeed(70);
     this->SetIsFollowed(false);
     this->SetFollowLeader(true);
+}
+
+void Leader::ChangeBehavior(Vector2D* input)
+{
+    m_input = input;
+//    std::string str = "ICI = x : " + std::to_string(m_input.x) + ", y : " + std::to_string(m_input.y) + "\n";
+//    OutputDebugString(str.c_str());
+    if (this->World()->GetHuman())
+    {
+        m_vVelocity = Vector2D(0, 0);
+    }
+}
+
+Vector2D Leader::GetForces()
+{
+    if (World()->GetHuman())
+    {
+        return m_dMaxSpeed * (*m_input) * 0.5f;
+    }
+    else
+    {
+        return m_pSteering->Calculate();
+    }
 }

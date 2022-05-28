@@ -61,6 +61,12 @@ private:
   //keeps track of the average FPS
   double                         m_dAvFrameTime;
 
+  //boolean indicating if the leader is controled by a human
+  bool m_human;
+
+  //vectir keeping the directions
+  Vector2D m_input;
+
 
   //flags to turn aids and obstacles etc on/off
   bool  m_bShowWalls;
@@ -141,6 +147,9 @@ public:
   
   void  ToggleViewKeys(){m_bViewKeys = !m_bViewKeys;}
   bool  ViewKeys()const{return m_bViewKeys;}
+
+  void SetHuman(bool b) { m_human = b; }
+  bool GetHuman() { return m_human; }
 
 };
 
